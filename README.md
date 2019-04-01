@@ -8,6 +8,8 @@ To date, the implementation is in its very early stages, reproducing only the fi
 
 The main difference thus far is that I use 1-base indexing instead of 0-base indexing, and the package name is capitalized in accordance with the Julia standard.
 
+To use the plotting routines that come with _kwant_, you must implicitly call `using PyPlot`. Then something like `plot(syst)` should plot the system. Dependeing on the environment and build, you may need to explicitly call `gcf()` to show the figure.
+
 Thus the first lines of the _kwant_ tutorial read
 ``` JULIA
 import kwant
