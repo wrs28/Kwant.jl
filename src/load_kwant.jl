@@ -1,5 +1,5 @@
 using PyCall
-const KWANT = PyNULL()
+const kwant = PyNULL()
 function __init__()
-    copy!(KWANT, pyimport("kwant"))
+    copy!(kwant, pyimport("kwant"))
 end
