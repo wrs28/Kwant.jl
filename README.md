@@ -6,6 +6,23 @@ The goal of this project is to faithfully emulate the native API of _kwant_.
 
 To date, the implementation is in its very early stages, reproducing only the first page of the [First Steps Tutorial](https://kwant-project.org/doc/1/tutorial/first_steps).
 
+### Installation
+To install from the Julia REPL, do `]add https://github.com/wrs28/Kwant.jl.git`, which will look like
+````JULIA
+(v1.1) pkg> add https://github.com/wrs28/Kwant.jl.git
+````
+or perhaps `using Pkg` and `Pkg.add("https://github.com/wrs28/Kwant.jl.git")`.
+
+It is easiest to make a new installation of _kwant_ via the Conda.jl package (first do `]add Conda`). This can be done with
+````JULIA
+using Conda
+Conda.add_channel("conda-forge")
+Conda.add("kwant")
+````
+If you don't want to install a Julia-private instance of _kwant_, you can play some trickery with building PyCall to the same Python library (instructions [here](https://github.com/JuliaPy/PyCall.jl#specifying-the-python-version)), but I don't recommend it.
+
+### Notes
+
 The main difference thus far is that I use 1-base indexing instead of 0-base indexing, and the package name is capitalized in accordance with the Julia standard.
 
 To use the plotting routines that come with _kwant_, you must implicitly call `using PyPlot`. Then something like `plot(syst)` should plot the system. Dependeing on the environment and build, you may need to explicitly call `gcf()` to show the figure.
