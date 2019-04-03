@@ -1,33 +1,21 @@
 module Kwant
 
-using PyPlot
-
 export Builder,
-lattice,
 TranslationalSymmetry,
-plot
-
-include("load_kwant.jl")
-include("Lattice.jl")
+plot,
+smatrix,
+lattice,
+builder
 
 abstract type AbstractKwantObject end
 
-struct Builder <:AbstractKwantObject
-    o::PyObject
-    Builder() = new(kwant.Builder())
-    Builder(x) = new(kwant.Builder(x))
-end
+include("load_kwant.jl")
+include("Lattice.jl")
+include("Builder.jl")
 
-struct _FiniteSystem <:AbstractKwantObject
-    o::PyObject
-end
-struct FiniteSystem <:AbstractKwantObject
-    o::PyObject
-end
-(fs::_FiniteSystem)() = FiniteSystem(fs.o())
+using PyPlot
+using .builder
 
-(p::PyObject)(k::AbstractKwantObject,args...) = pycall(p,PyObject,k.o,args...)
-# (p::PyObject)(args...) = pycall(p,PyObject,(args...,))
 function Base.getproperty(k::AbstractKwantObject, name::Symbol)
     if name==:o
         p = getfield(k,:o)
@@ -36,16 +24,23 @@ function Base.getproperty(k::AbstractKwantObject, name::Symbol)
     end
     if name==:finalized
         p = _FiniteSystem(p)
+    elseif name==:neighbors
+        p = _Neighbors(p)
     end
     return p
 end
-function Base.setproperty!(b::Builder, name::Symbol, x::AbstractKwantObject)
-    setproperty!(b.o,name,x.o)
-end
-Base.setindex!(b::Builder,val,keys...) = set!(b.o,keys,val)
-Base.setindex!(b::Builder,val,key) = set!(b.o,key,val)
+
+(p::PyObject)(k::AbstractKwantObject,args...) = pycall(p,PyObject,k.o,args...)
+
+struct _FiniteSystem o::PyObject end
+struct _Neighbors o::PyObject end
+(fs::_FiniteSystem)() = pycall(fs.o,PyObject)
+(nn::_Neighbors)() = pycall(nn.o,PyObject)
+
 PyPlot.plot(b::AbstractKwantObject) = kwant.plot(b.o)
 
 TranslationalSymmetry(x) = kwant.TranslationalSymmetry(x)
+
+smatrix(system, energy) = pycall(kwant.smatrix,PyObject,system,energy)
 
 end # module
