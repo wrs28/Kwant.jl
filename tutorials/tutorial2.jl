@@ -1,47 +1,32 @@
-using Kwant,
-    PyPlot,
-    PyCall
+using Kwant, PyPlot, PyCall
+kwant = Kwant; pyplot = PyPlot
 
-tinyarray = pyimport("tinyarray")
-    sigma_0 = tinyarray.array([[1, 0], [0, 1]])
-    sigma_x = tinyarray.array([[0, 1], [1, 0]])
-    sigma_y = tinyarray.array([[0, -1im], [1im, 0]])
-    sigma_z = tinyarray.array([[1, 0], [0, -1]])
+######### SPIN ORBIT ############
 
-function make_system(t=1.0, alpha=0.5, e_z=0.08, W=10, L=30)
-    lat = lattice.square()
-    syst = Builder()
+include("spin_orbit.jl")
 
-    syst[[lat(x, y) for x in 1:L for y in 1:W]] = 4t*sigma_0+e_z*sigma_z
+syst = make_system()
 
-    syst[builder.HoppingKind((1, 0), lat, lat)] = -t*sigma_0 + 1im*alpha*sigma_y/2
-    syst[builder.HoppingKind((0, 1), lat, lat)] = -t*sigma_0 - 1im*alpha*sigma_x/2
+# Check that the system looks as intended.
+kwant.plot(syst)
 
-    lead = Builder(TranslationalSymmetry((-1, 0)))
-    lead[[lat(0, j) for j in 1:W]] = 4t*sigma_0 + e_z*sigma_z
-    lead[builder.HoppingKind((1, 0), lat, lat)] = -t*sigma_0 + 1im*alpha*sigma_y/2
-    lead[builder.HoppingKind((0, 1), lat, lat)] = -t*sigma_0 - 1im*alpha*sigma_x/2
+# Finalize the system.
+syst = syst.finalized()
 
-    syst.attach_lead(lead)
-    syst.attach_lead(lead.reversed())
-    return syst
-end
+# We should see non-monotonic conductance steps.
+plot_conductance(syst, [0.01 * i - 0.3 for i in range(0,length=100)])
+# CHANGE from oringal: energies not specified as keyword
 
-function plot_conductance(syst, energies)
-    # Compute conductance
-    data = []
-    for energy in energies
-        smatrix = Kwant.smatrix(syst, energy)
-        append!(data,smatrix.transmission(1, 0))
-    end
 
-    plot(energies, data)
-    xlabel("energy [t]")
-    ylabel("conductance [e^2/h]")
-    gcf()
-end
+######### QUANTUM WELL ############
+include("quantum_well.jl")
+syst = make_system()
 
-system = make_system()
-syst = system.finalized()
+# Check that the system looks as intended.
+kwant.plot(syst)
 
-plot_conductance(syst, [0.01i-0.3 for i in 0:56])
+# Finalize the system.
+syst = syst.finalized()
+
+# We should see conductance steps.
+plot_conductance(syst, 0.2, [0.01 * i for i in 0:100-1]) ## note 1:100 not range(100)

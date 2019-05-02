@@ -1,101 +1,36 @@
-using Kwant,
-    PyPlot
+import Kwant, PyPlot
+    kwant = Kwant
+    pyplot = PyPlot
 
-syst = Builder()
+include("quantum_wire.jl")
 
-a = 1
-    lat = lattice.square(a)
-    t = 1.0
-    W = 10
-    L = 30
+syst.attach_lead(right_lead)
 
-    for i ∈ 1:L
-        for j ∈ 1:W
-            # On-site Hamiltonian
-            syst[lat(i,j)] = 4*t
+# Plot it, to make sure it's OK
+kwant.plot(syst)
 
-            # Hopping in y-direction
-            if j > 1
-                syst[lat(i,j),lat(i,j-1)] = -t
-            end
-
-            # Hopping in x-direction
-            if i > 1
-                syst[lat(i,j), lat(i-1,j)] = -t
-            end
-        end
-    end
-
-plot(syst)
-
-sym_left_lead = TranslationalSymmetry((-a, 0))
-    left_lead = Builder(sym_left_lead)
-
-    for j in 1:W
-        left_lead[lat(1, j)] = 4 * t
-        if j > 1
-            left_lead[lat(1, j), lat(1, j - 1)] = -t
-        end
-        left_lead[lat(2, j), lat(1, j)] = -t
-    end
-
-    syst.attach_lead(left_lead)
-
-sym_right_lead = TranslationalSymmetry((a, 0))
-    right_lead = Builder(sym_right_lead)
-
-    for j in 1:W
-        right_lead[lat(1, j)] = 4 * t
-        if j > 1
-            right_lead[lat(1, j), lat(1, j - 1)] = -t
-        end
-        right_lead[lat(2, j), lat(1, j)] = -t
-    end
-
-    syst.attach_lead(right_lead)
-
-plot(syst)
-
+# Finalize the system
 syst = syst.finalized()
 
+# Now that we have the system, we can compute conductance
 energies = []
 data = []
-for ie in 1:100
+for ie in range(0,length=100)
     energy = ie * 0.01
-    smatrix = Kwant.kwant.smatrix(syst, energy)
-    append!(energies,energy)
-    append!(data,smatrix.transmission(1, 0))
+
+    # compute the scattering matrix at a given energy
+    smatrix = kwant.smatrix(syst, energy)
+
+    # compute the transmission probability from lead 0 to
+    # lead 1
+    append!(energies,energy) ## CHANGE: note append!(energies,...) not energies.append(...)
+    append!(data,smatrix.transmission(1, 0)) ## CHANGE: note append!(data,...) not data.append(...)
 end
 
-clf(); plot(energies,data); gcf()
-
-function make_system(a=1, t=1.0, W=10, L=30)
-    lat = lattice.square(a)
-    syst = Builder()
-    syst[[lat(x, y) for x in 1:L for y in 1:W]] = 4 * t
-    syst[lat.neighbors()] = -t
-    lead = Builder(TranslationalSymmetry((-a, 0)))
-    lead[[lat(0, j) for j in 1:W]] = 4 * t
-    lead[lat.neighbors()] = -t
-    syst.attach_lead(lead)
-    syst.attach_lead(lead.reversed())
-    return syst
-end
-
-function plot_conductance(syst, energies)
-    # Compute conductance
-    data = []
-    for energy in energies
-        smatrix = Kwant.smatrix(syst, energy)
-        append!(data,smatrix.transmission(1, 0))
-    end
-
-    plot(energies, data)
-    xlabel("energy [t]")
-    ylabel("conductance [e^2/h]")
-    gcf()
-end
-
-system = make_system()
-syst = system.finalized()
-plot_conductance(syst,LinRange(0,1,100))
+# Use matplotlib to write output
+# We should see conductance steps
+pyplot.figure()
+pyplot.plot(energies, data)
+pyplot.xlabel("energy [t]")
+pyplot.ylabel("conductance [e^2/h]")
+pyplot.gcf() ## note gcf not show

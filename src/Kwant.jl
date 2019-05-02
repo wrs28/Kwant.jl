@@ -2,7 +2,6 @@ module Kwant
 
 export Builder,
 TranslationalSymmetry,
-plot,
 smatrix,
 lattice,
 builder
@@ -37,10 +36,10 @@ struct _Neighbors o::PyObject end
 (fs::_FiniteSystem)() = pycall(fs.o,PyObject)
 (nn::_Neighbors)() = pycall(nn.o,PyObject)
 
-PyPlot.plot(b::AbstractKwantObject) = kwant.plot(b.o)
+PyPlot.plot(b::AbstractKwantObject; kwargs...) = kwant.plot(b.o;kwargs...)
 
 TranslationalSymmetry(x) = kwant.TranslationalSymmetry(x)
 
-smatrix(system, energy) = pycall(kwant.smatrix,PyObject,system,energy)
+smatrix(system, energy; params=nothing) = pycall(kwant.smatrix,PyObject,system,energy,params=params)
 
 end # module
