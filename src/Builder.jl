@@ -16,8 +16,15 @@ Base.setproperty!(b::Builder, name::Symbol, x::AbstractKwantObject) =
 
 Base.setindex!(b::Builder,val,keys...) = set!(b.o,keys,val)
 Base.setindex!(b::Builder,val,key) = set!(b.o,key,val)
+Base.setindex!(b::Builder,val,key::AbstractKwantObject) = set!(b.o,key.o,val)
 
-HoppingKind(a::Tuple,b::AbstractKwantObject,c::AbstractKwantObject) = pycall(kwant.builder.HoppingKind,PyObject,a,b.o,c.o)
+struct HoppingKind <: AbstractKwantObject
+    o::PyObject
+    (hk::HoppingKind)(syst::Builder) = hk.o(syst)
+    function HoppingKind(a::Tuple,b::AbstractKwantObject,c::AbstractKwantObject)
+        new(pycall(kwant.builder.HoppingKind,PyObject,a,b.o,c.o))
+    end
+end
 
 
 end # module

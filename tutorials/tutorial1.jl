@@ -1,6 +1,5 @@
 import Kwant, PyPlot
-    kwant = Kwant
-    pyplot = PyPlot
+kwant = Kwant; pyplot = PyPlot
 
 include("quantum_wire.jl")
 
