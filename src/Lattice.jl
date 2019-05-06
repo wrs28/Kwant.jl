@@ -9,7 +9,7 @@ struct Monatomic <: AbstractLattice o::PyObject end
 
 (lat::Monatomic)(i::Integer,j::Integer) = pycall(lat.o,PyObject,i-1,j-1)
 
-square(a=1) = Monatomic(kwant.lattice.square(a))
+square(a=1;kwargs...) = Monatomic(kwant.lattice.square(a;kwargs...))
 
 end # module
 
