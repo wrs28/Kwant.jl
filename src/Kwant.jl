@@ -31,6 +31,7 @@ end
 
 (p::PyObject)(k::AbstractKwantObject,args...) = pycall(p,PyObject,k.o,args...)
 
+
 struct _FiniteSystem o::PyObject end
 struct _Neighbors o::PyObject end
 (fs::_FiniteSystem)() = pycall(fs.o,PyObject)

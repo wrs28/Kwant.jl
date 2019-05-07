@@ -24,8 +24,25 @@ struct HoppingKind <: AbstractKwantObject
     function HoppingKind(a::Tuple,b::AbstractKwantObject,c::AbstractKwantObject)
         new(pycall(kwant.builder.HoppingKind,PyObject,a,b.o,c.o))
     end
+    # function HoppingKind(a::Tuple,b::PyObject,c::PyObject)
+        # new(pycall(kwant.builder.HoppingKind,PyObject,a,b,c))
+    # end
+    HoppingKind(a::Tuple) = HoppingKind(a...)
 end
 
+function Base.deleteat!(b::Builder,o::PyObject)
+    py"""
+    del $(b.o)[$o]
+    """
+    return nothing
+end
+
+function Base.setindex!(b::Builder,val,keys::Array{HoppingKind})
+    for k ∈ keys
+        b[k]=val
+    end
+    return nothing
+end
 
 end # module
 
