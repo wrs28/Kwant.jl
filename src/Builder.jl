@@ -8,7 +8,7 @@ import .. AbstractKwantObject
 struct Builder <:AbstractKwantObject
     o::PyObject
     Builder() = new(kwant.Builder())
-    Builder(x) = new(kwant.Builder(x))
+    Builder(x;kwargs...) = new(kwant.Builder(x;kwargs...))
 end
 
 Base.setproperty!(b::Builder, name::Symbol, x::AbstractKwantObject) =
