@@ -44,6 +44,7 @@ struct _Neighbors o::PyObject end
 PyPlot.plot(b::AbstractKwantObject; kwargs...) = kwant.plot(b.o;kwargs...)
 
 TranslationalSymmetry(x) = kwant.TranslationalSymmetry(x)
+wave_function(args...;kwargs...) = kwant.wave_function(args...;kwargs...)
 
 struct smatrix <: AbstractKwantObject
     o::PyObject
