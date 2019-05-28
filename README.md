@@ -4,7 +4,7 @@ Kwant.jl is an interface with the [_kwant_](https://kwant-project.org) quantum t
 
 The goal of this project is to faithfully emulate the native API of _kwant_.
 
-To date, the implementation is in its very early stages, reproducing only the first few pages of the [First Steps Tutorial](https://kwant-project.org/doc/1/tutorial/first_steps).
+To date, the implementation is in its very early stages, reproducing only the first few pages of the [First Steps Tutorial](https://kwant-project.org/doc/1/tutorial/first_steps). See the [tutorials folder](https://github.com/wrs28/Kwant.jl/tree/master/tutorials).
 
 ### Installation
 To install from the Julia REPL, do `]add https://github.com/wrs28/Kwant.jl.git`, which will look like
