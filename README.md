@@ -50,9 +50,8 @@ for i in range(L):
 
 while the first lines of the Julia implementation read
 ``` JULIA
-import Kwant, PyPlot
-kwant = Kwant; pyplot = PyPlot
-
+import Kwant
+kwant = Kwant
 syst = kwant.Builder()
 a = 1
 lat = kwant.lattice.square(a)
