@@ -5,11 +5,13 @@ kwant = Kwant; plt = PyPlot
 
 include("magnetic_texture.jl")
 
+plot(make_system())
 syst = make_system().finalized()
 
-params = Dict(:r0=>20, :delta=>10, :J=>1)
-wf = kwant.wave_function(syst, energy=-1, params=params)
-psi = wf(0)[2,:]
+
+params = Dict("r0"=>20, "delta"=>10, "J"=>1)
+wf = kwant.wave_function(syst; :energy=>-1, :params=>params)
+psi = wf(0)[1,:]
 
 plot_vector_field(syst; r0=20, delta=10)
 
@@ -32,11 +34,12 @@ density = rho(psi)
 spin_z = rho_sz(psi)
 spin_y = rho_sy(psi)
 
-plot_densities(syst, [
-    ('$σ_0$', density),
-    ('$σ_z$', spin_z),
-    ('$σ_y$', spin_y),
-])
+plot_densities(
+    syst,
+    [("σ_0", density),
+     ("σ_z", spin_z),
+     ("σ_y", spin_y)]
+    )
 
 J_0 = kwant.operator.Current(syst)
 J_z = kwant.operator.Current(syst, sigma_z)
@@ -47,20 +50,24 @@ current = J_0(psi)
 spin_z_current = J_z(psi)
 spin_y_current = J_y(psi)
 
-plot_currents(syst, [
-    ('$J_{σ_0}$', current),
-    ('$J_{σ_z}$', spin_z_current),
-    ('$J_{σ_y}$', spin_y_current),
-])
+plot_currents(
+    syst,
+    [("J_{σ_0}", current),
+     ("J_{σ_z}", spin_z_current),
+     ("J_{σ_y}", spin_y_current)]
+    )
 
+py"""
+import numpy as np
 def following_m_i(site, r0, delta):
-    m_i = field_direction(site.pos, r0, delta)
-    return np.dot(m_i, sigma)
+    m_i = $field_direction(site.pos, r0, delta)
+    return np.dot(m_i,$sigma)
+"""
 
-J_m = kwant.operator.Current(syst, following_m_i)
+J_m = kwant.operator.Current(syst, py"following_m_i")
 
 # evaluate the operator
-m_current = J_m(psi, params=dict(r0=25, delta=10))
+m_current = J_m(psi, params=Dict(:r0=>25, :delta=>10))
 
 plot_currents(syst, [
     (r"$J_{\mathbf{m}_i}$", m_current),

@@ -20,7 +20,8 @@ sigma_z = [1 0; 0 -1]
 # letters denote spinor indices
 sigma = [sigma_x, sigma_y, sigma_z]
 
-function field_direction(pos; r0, delta)
+field_direction(pos; r0, delta) = field_direction(pos,r0,delta)
+function field_direction(pos, r0, delta)
     x, y = pos
     r = norm(pos)
     r_tilde = (r - r0) / delta
@@ -40,11 +41,6 @@ function field_direction(pos; r0, delta)
 end
 
 
-py"""
-def scattering_onsite(site, r0, delta, J):
-    m_i = $field_direction(site.pos, r0=r0, delta=delta)
-    return J * (m_i[0]*$(sigma[1]) + m_i[1]*$(sigma[2]) + m_i[2]*$(sigma[3]))
-"""
 
 
 py"""
@@ -63,13 +59,24 @@ function make_system(L=80)
         return all(-L/2 < p < L/2 for p in pos)
     end
 
-    syst[lat.shape(square, (0, 0))] = -4sigma_0#py"scattering_onsite"
+    py"""
+    import numpy as np
+    def scattering_onsite(site, r0, delta, J):
+        return J*sigma_Z# m_i = [1,1,1]
+        # return J + np.dot(m_i,$sigma)
+    """
+    # m_i = $field_direction(site.pos, r0, delta)
+    # return J * (m_i[0]*$(sigma[1]) + m_i[1]*$(sigma[2]) + m_i[2]*$(sigma[3]))
+
+
+    syst[lat.shape(square, (0, 0))] = py"scattering_onsite"#J*sigma_z#
     syst[lat.neighbors()] = -sigma_0
 
     lead = kwant.Builder(kwant.TranslationalSymmetry((-1, 0)),
                          conservation_law=-sigma_z)
 
-    lead[lat.shape(square, (0, 0))] = py"lead_onsite"
+
+    lead[lat.shape(square, (0, 0))] = sigma_z#py"lead_onsite"
     lead[lat.neighbors()] = -sigma_0
 
     syst.attach_lead(lead)
@@ -95,24 +102,25 @@ function plot_vector_field(syst; params...)
 end
 
 
-# function plot_densities(syst, densities)
-#     fig, axes = plt.subplots(1, len(densities))
-#     for ax, (title, rho) in zip(axes, densities)
-#         kwant.plotter.map(syst, rho, ax=ax, a=4)
-#         ax.set_title(title)
-#     end
-#     plt.show()
-# end
-#
-#
-# function plot_currents(syst, currents)
-#     fig, axes = plt.subplots(1, len(currents))
-#     if not hasattr(axes, "__len__")
-#         axes = (axes,)
-#     end
-#     for ax, (title, current) in zip(axes, currents)
-#         kwant.plotter.current(syst, current, ax=ax, colorbar=false)
-#         ax.set_title(title)
-#     end
-#     plt.gcf()
-# end
+function plot_densities(syst, densities)
+    fig, axes = plt.subplots(1, length(densities))
+    for (ax, (title, rho)) in zip(axes, densities)
+        kwant.plotter.map(syst, rho, ax=ax, a=4)
+        ax.set_title(title)
+    end
+    plt.gcf()
+end
+
+
+function plot_currents(syst, currents)
+    fig, axes = plt.subplots(1, length(currents))
+    # if !hasattr(axes, "__len__")
+    if length(axes)>1
+        axes = (axes,)
+    end
+    for (ax, (title, current)) in zip(axes, currents)
+        kwant.plotter.current(syst, current, ax=ax, colorbar=false)
+        ax.set_title(title)
+    end
+    plt.gcf()
+end
